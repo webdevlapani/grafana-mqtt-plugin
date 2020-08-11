@@ -31,15 +31,20 @@ func newDatasource() datasource.ServeOpts {
 
 	mux.HandleFunc("/certificates", ds.handleGetCertificates)
 	mux.HandleFunc("/certificates/create", ds.handleCreateCertificate)
-	//mux.HandleFunc("/certificates/import", ds.handleImportCertificate)
+	mux.HandleFunc("/certificates/register", ds.handleRegisterCertificate)
 	mux.HandleFunc("/certificates/revoke", ds.handleRevokeCertificate)
-	mux.HandleFunc("/certificates/set/inactive", ds.handleCertificateSetActive)
-	mux.HandleFunc("/certificates/set/active", ds.handleCertificateSetInactive)
+	mux.HandleFunc("/certificates/set-inactive", ds.handleCertificateSetActive)
+	mux.HandleFunc("/certificates/set-active", ds.handleCertificateSetInactive)
 	mux.HandleFunc("/certificates/delete", ds.handleDeleteCertificate)
 
-	//mux.HandleFunc("/ca/import", ds.handleImportCA)
-	//mux.HandleFunc("/ca/:arn/enable", ds.handleEnableCA)
-	//mux.HandleFunc("/ca/:arn/disable", ds.handleDisableCA)
+	mux.HandleFunc("/ca", ds.handleGetCA)
+	mux.HandleFunc("/ca/registration-code", ds.handleGetRegistrationCode)
+	mux.HandleFunc("/ca/register", ds.handleRegisterCA)
+	mux.HandleFunc("/ca/set-inactive", ds.handleCASetInactive)
+	mux.HandleFunc("/ca/set-active", ds.handleCASetActive)
+	mux.HandleFunc("/ca/enable-auto-registration", ds.handleCAEnableAutoRegistration)
+	mux.HandleFunc("/ca/disable-auto-registration", ds.handleCADisableAutoRegistration)
+	mux.HandleFunc("/ca/delete", ds.handleDeleteCA)
 
 	return datasource.ServeOpts{
 		QueryDataHandler:    ds,
