@@ -70,9 +70,6 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-          - ci/jobs/package
           - ci/packages
-          - ci/dist
-          - ci/grafana-test-env
       - store_artifacts:
           path: ci
