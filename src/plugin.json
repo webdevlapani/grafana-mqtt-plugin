@@ -1,0 +1,50 @@
+{
+  "type": "datasource",
+  "name": "MQTT",
+  "id": "tvarit-mqtt-datasource",
+
+  "metrics": true,
+  "backend": true,
+  "executable": "gpx_mqtt-datasource",
+
+  "info": {
+    "description": "AWS IoT MQTT Datasource",
+    "author": {
+      "name": "Tvarit GmbH",
+      "url": "https://tvarit.com/"
+    },
+    "keywords": [
+      "aws",
+      "mqtt",
+      "iot",
+      "datasource",
+      "tvarit"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Tvarit GmbH",
+        "url": "https://tvarit.com"
+      },
+      {
+        "name": "GitHub",
+        "url": "https://github.com/tvarit-foggy/grafana-mqtt-plugin"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/tvarit-foggy/grafana-mqtt-plugin/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "7.x.x",
+    "plugins": []
+  }
+}
