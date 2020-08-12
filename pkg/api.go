@@ -19,6 +19,12 @@ func (ds *MQTTDatasource) handleGetEndpoint(resp http.ResponseWriter, req *http.
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	svc, err := ds.authenticate(req.Context(), region)
 	if err != nil {
 		throw(resp, 500, "Could not create session!", err.Error())
@@ -41,6 +47,12 @@ func (ds *MQTTDatasource) handleCreateCertificate(resp http.ResponseWriter, req 
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -104,11 +116,17 @@ type Certificate struct {
 func (ds *MQTTDatasource) handleGetCertificates(resp http.ResponseWriter, req *http.Request) {
 	// TODO: allow only get requests
 
-	//region := req.URL.Query().Get("region")
-	//if region == "" {
-	//	throw(resp, 400, "Invalid or missing region!", "")
-	//	return
-	//}
+	region := req.URL.Query().Get("region")
+	if region == "" {
+		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
 
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
@@ -148,6 +166,12 @@ func (ds *MQTTDatasource) handleCertificateSetActive(resp http.ResponseWriter, r
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	id := req.URL.Query().Get("id")
 	if id == "" {
 		throw(resp, 400, "Invalid or missing certificate id!", "")
@@ -170,6 +194,12 @@ func (ds *MQTTDatasource) handleCertificateSetInactive(resp http.ResponseWriter,
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -198,6 +228,12 @@ func (ds *MQTTDatasource) handleRevokeCertificate(resp http.ResponseWriter, req 
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	id := req.URL.Query().Get("id")
 	if id == "" {
 		throw(resp, 400, "Invalid or missing certificate id!", "")
@@ -220,6 +256,12 @@ func (ds *MQTTDatasource) handleDeleteCertificate(resp http.ResponseWriter, req 
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -249,6 +291,12 @@ func (ds *MQTTDatasource) handleRegisterCertificate(resp http.ResponseWriter, re
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -315,11 +363,17 @@ type CA struct {
 func (ds *MQTTDatasource) handleGetCA(resp http.ResponseWriter, req *http.Request) {
 	// TODO: allow only get requests
 
-	//region := req.URL.Query().Get("region")
-	//if region == "" {
-	//	throw(resp, 400, "Invalid or missing region!", "")
-	//	return
-	//}
+	region := req.URL.Query().Get("region")
+	if region == "" {
+		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
 
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
@@ -359,6 +413,12 @@ func (ds *MQTTDatasource) handleGetRegistrationCode(resp http.ResponseWriter, re
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
 	//	throw(resp, 500, "Could not create session!", err.Error())
@@ -375,6 +435,12 @@ func (ds *MQTTDatasource) handleRegisterCA(resp http.ResponseWriter, req *http.R
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -449,6 +515,12 @@ func (ds *MQTTDatasource) handleCASetInactive(resp http.ResponseWriter, req *htt
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
 	//	throw(resp, 500, "Could not create session!", err.Error())
@@ -465,6 +537,12 @@ func (ds *MQTTDatasource) handleCASetActive(resp http.ResponseWriter, req *http.
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 
@@ -487,6 +565,12 @@ func (ds *MQTTDatasource) handleCAEnableAutoRegistration(resp http.ResponseWrite
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
 	//	throw(resp, 500, "Could not create session!", err.Error())
@@ -506,6 +590,12 @@ func (ds *MQTTDatasource) handleCADisableAutoRegistration(resp http.ResponseWrit
 		return
 	}
 
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
+		return
+	}
+
 	//svc, err := ds.authenticate(req.Context(), region)
 	//if err != nil {
 	//	throw(resp, 500, "Could not create session!", err.Error())
@@ -522,6 +612,12 @@ func (ds *MQTTDatasource) handleDeleteCA(resp http.ResponseWriter, req *http.Req
 	region := req.URL.Query().Get("region")
 	if region == "" {
 		throw(resp, 400, "Invalid or missing region!", "")
+		return
+	}
+
+	err := ds.createStorage(req.Context(), region)
+	if err != nil {
+		throw(resp, 500, "Could not provision storage!", err.Error())
 		return
 	}
 

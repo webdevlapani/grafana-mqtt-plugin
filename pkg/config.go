@@ -19,9 +19,13 @@ type Cfg struct {
 	Zone    string
 	Env     string
 
+	S3BucketPrefix string
+
 	AWSAccountId string
 	AWSAccessKey string
 	AWSSecretKey string
+
+	Storage map[string]int
 }
 
 func applyEnvVariableOverrides(file *ini.File) error {
@@ -118,6 +122,16 @@ func loadConfig() *Cfg {
 	cfg.Env, err = valueAsString(iniFile.Section(""), "environment", "alpha")
 	if err != nil {
 		fmt.Printf("enviroment invalid in %q: %v\n", ConfigFile, err)
+		os.Exit(1)
+	}
+
+	cfg.S3BucketPrefix, err = valueAsString(iniFile.Section("s3"), "bucket_prefix", "")
+	if err != nil {
+		fmt.Printf("aws.bucket_prefix invalid in %q: %v\n", ConfigFile, err)
+		os.Exit(1)
+	}
+	if cfg.S3BucketPrefix == "" {
+		fmt.Printf("aws.bucket_prefix required in %q\n", ConfigFile)
 		os.Exit(1)
 	}
 
