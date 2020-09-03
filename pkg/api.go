@@ -41,6 +41,17 @@ func (ds *MQTTDatasource) handleGetEndpoint(resp http.ResponseWriter, req *http.
 	_, _ = resp.Write([]byte(*result.EndpointAddress))
 }
 
+type CreateCertificate struct {
+	Id          string `json:"id"`
+	Status      string `json:"status"`
+	Topic       string `json:"topic"`
+	Client      string `json:"client"`
+	PublicKey   string `json:"public_key"`
+	PrivateKey  string `json:"private_key"`
+	Certificate string `json:"certificate"`
+	RootCA      string `json:"root_ca"`
+}
+
 func (ds *MQTTDatasource) handleCreateCertificate(resp http.ResponseWriter, req *http.Request) {
 	// TODO: allow only post requests
 
@@ -103,7 +114,95 @@ func (ds *MQTTDatasource) handleCreateCertificate(resp http.ResponseWriter, req 
 
 	// TODO: enable transaction lock. Say if certificate creation fails, corresponding policy must be deleted
 
-	fmt.Fprintf(resp, "Hello, %q from %q", req.URL.Path, region)
+	certificate := CreateCertificate{
+		Id: "72dd3f3e77",
+		Status: "ACTIVE",
+		Topic: "/1/2/*",
+		Client: "/1/2/*",
+		PublicKey: `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApsssipafEUmLQZUtDtYd
+nSmajTjtBnwqCIl6ucEjWg/gUvs+hiBegvlOmKjZS8gaU2mwUWcXGSlD31OPpcjq
+H9R9hpLPyrfq1zFpT7sE/9soC7n6Th9S5VsTyxUMm9+e2YYVjfsqelpOKi0XSyBX
+dI2vsulHl61TYotju7PDk5Lc7ZYUo6GyTtql+Hz5JR1KnumSktrOqOVWxbZpSPIr
+GJ9ToudRyrPhIFTcWGkoBsQVBMJxvNe6V0b7gyRb414wr89jIO0VsPps6ronAAPu
++pLOJDO7SUIvG8nVxsa0CbTFJDUloobQBItbWs5YSsC25Q/RmSv8PVxblNlXFLXx
++QIDAQAB
+-----END PUBLIC KEY-----`,
+		PrivateKey: `-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEApsssipafEUmLQZUtDtYdnSmajTjtBnwqCIl6ucEjWg/gUvs+
+hiBegvlOmKjZS8gaU2mwUWcXGSlD31OPpcjqH9R9hpLPyrfq1zFpT7sE/9soC7n6
+Th9S5VsTyxUMm9+e2YYVjfsqelpOKi0XSyBXdI2vsulHl61TYotju7PDk5Lc7ZYU
+o6GyTtql+Hz5JR1KnumSktrOqOVWxbZpSPIrGJ9ToudRyrPhIFTcWGkoBsQVBMJx
+vNe6V0b7gyRb414wr89jIO0VsPps6ronAAPu+pLOJDO7SUIvG8nVxsa0CbTFJDUl
+oobQBItbWs5YSsC25Q/RmSv8PVxblNlXFLXx+QIDAQABAoIBADak88fHxv9j59Kp
+q+Rjc7pMqgzAbK8mOKMpX2LCCvHzp5uoInjQ3AXu5bgQAXjZav6O7qwMqT2eDlV5
+S+OVqlaZSDKxoJAapz6vOoBbliy4wSruWDoF+yOXLinnkIT0w1cinacxdV42fctF
+kI8VXnGaBckIsmLX7yym3BrfryCGgoxFLw30dMJ0TgQSvU2JqVNqwsDiEy666y8K
+YDtQqUGW0GO4SDARPzw4SI+3Z1AKJSmKGp88rD0fiKDYxUKZRYRsEuKuENxUxLfF
+zdnkQkB6aJ3B9jjvHT6YoeID9aZm6c35KJtw4Jq4rVJy4VoZOlfeWIFDNTCOWh12
+g4fG6t0CgYEA1kYpP9tw7zeiIPE8pAcsf8lZ071bn1R2/hW5Tsrjn9AN8v1EKGkz
+EnjiUi0ki0IQkJeZcy1UDClkw0XCjxTTCWwTLKoJoCoVJcFxST50AgnHZlp4g4CG
+kif3QounExKMzEuIB5aybI1Fcu66tDjphSe4YsEV1gelP7ANyj8BbrMCgYEAx0YN
+fZM434c8tgD1do7OAKFQSfTbRBD7KKZiSo7Vdios17FBG4WpHZE3dqzAuyerSbiV
+DRc7JZE3psAEqvDgKdTqTbqvAMui7/9MHSF7XlT//zV5HeBlaEGGz29G4isZIyaY
+B810T96C8Qd0oynuIQW33LtOxDeOkAO9aNLcsqMCgYABrw117gCGMLa6cYrbcx77
+ZhapnkxRBTXmKz+Iifmd8OGbLjhR5Pm8xGxq3uXxnjRJHpfbGtkVO2IKUssDmtNJ
+uKqx6CgpNQtzf4CnZbE9rtv9Ruq5hdII5f2AbV6DvNqUZGeOP7XpOnb4Pz4CWowj
+OrutMv078FVxGa4SD8qwFwKBgGeSqopdTc8ojE6Q2wQfH0VGkuONp7WOGey75hSY
+fqxnKV2GXK/AXfDnPGurSJU9/hJYJOhj7bMN8l3yKbrrbadwacOyxyjjrrGNAPOX
+JncWOORd17DGpA53GGmSjcYZ3nvdoGFV0SF+JpK+bEouDf4N6c2JcVwdADUsLHNi
+PaF/AoGBALw1S9hDEy0kO8KouzM4N2gyGpZArFkynDEF7MdcXYzfh+r4EjY7eXe6
+7JhM2bGNXS7/5BwxroXroqrnYX70WS11Q+ZKiB/iD3B0flFu1xPoFOTXvxLXVLTC
+nB8B4tYXUKhBe7tdetdejC05lVLfxx9PRn9l6SWB0ZlMMwn7+pns
+-----END RSA PRIVATE KEY-----`,
+		Certificate: `-----BEGIN CERTIFICATE-----
+MIIDWTCCAkGgAwIBAgIUD7znBhWBAx2UkHAejHvAYr0NvHcwDQYJKoZIhvcNAQEL
+BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g
+SW5jLiBMPVNlYXR0bGUgU1Q9V2FzaGluZ3RvbiBDPVVTMB4XDTIwMDkwMzExMDIy
+NloXDTQ5MTIzMTIzNTk1OVowHjEcMBoGA1UEAwwTQVdTIElvVCBDZXJ0aWZpY2F0
+ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKbLLIqWnxFJi0GVLQ7W
+HZ0pmo047QZ8KgiJernBI1oP4FL7PoYgXoL5Tpio2UvIGlNpsFFnFxkpQ99Tj6XI
+6h/UfYaSz8q36tcxaU+7BP/bKAu5+k4fUuVbE8sVDJvfntmGFY37KnpaTiotF0sg
+V3SNr7LpR5etU2KLY7uzw5OS3O2WFKOhsk7apfh8+SUdSp7pkpLazqjlVsW2aUjy
+KxifU6LnUcqz4SBU3FhpKAbEFQTCcbzXuldG+4MkW+NeMK/PYyDtFbD6bOq6JwAD
+7vqSziQzu0lCLxvJ1cbGtAm0xSQ1JaKG0ASLW1rOWErAtuUP0Zkr/D1cW5TZVxS1
+8fkCAwEAAaNgMF4wHwYDVR0jBBgwFoAUKw5fIbldApdyWIyoTSb3lnsTXAowHQYD
+VR0OBBYEFAIqtKOavNt34+eyVm9GJkikruS/MAwGA1UdEwEB/wQCMAAwDgYDVR0P
+AQH/BAQDAgeAMA0GCSqGSIb3DQEBCwUAA4IBAQCnEo12gBsTSz+6sA8NFJh940oP
+8DgOTpYdo6WVfMKdrUXiUVc46QU+USMvMkgAjNr8g5l945u8JrWnqwa7q8y+2abw
+h1c/Nmgx3pwXM2MSYvWP5CdvxlTIvxk9h24AbhqwQTlThkWLAKd5LSRfqhc/LD43
+2RWDFrwCd7+Igakl+q8kZscuzzRtZUGgpQ7dTz3eOe2ELQWRU3SBC/2+33HoMdgN
+WG/VAWFPrtQ6FlM3GyEBBDamxW/7boXnOv+vlrPH37B19Aoaz494kiQzN3/vj9bn
+VeS/M8g9itrRh2oMcpmj9CdMDxt+qLoe86R0ru7JlGxXp0/YYO7iSJh5M7u0
+-----END CERTIFICATE-----`,
+		RootCA: `-----BEGIN CERTIFICATE-----
+MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF
+ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6
+b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL
+MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv
+b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj
+ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM
+9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw
+IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6
+VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L
+93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm
+jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC
+AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA
+A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI
+U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs
+N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv
+o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU
+5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy
+rqXRfboQnoZsG4q5WTP468SQvvG5
+-----END CERTIFICATE-----`,
+	}
+
+	responseBytes, err := json.Marshal(certificate)
+	if err != nil {
+		throw(resp, 500, "Could not create certificate!", err.Error())
+	}
+
+	_, _ = resp.Write(responseBytes)
 }
 
 type Certificate struct {
@@ -148,7 +247,16 @@ func (ds *MQTTDatasource) handleGetCertificates(resp http.ResponseWriter, req *h
 	//	...
 	// }]
 
-	certificates := make([]Certificate, 0)
+	//certificates := make([]Certificate, 0)
+
+	// dummy certificates
+	certificates := []Certificate{
+		Certificate{Id: "798bff761e3d831831f0310b074b95a307e57b2dc83272bdd291d66df5ac8e64", Status: "ACTIVE", Topic: "/1/2/*", Client: "/1/2/*"},
+		Certificate{Id: "91c2e97079d5c4688af516a58f7e4de03a9da40b5cdfefe8232473b0c5dcf1b0", Status: "INACTIVE", Topic: "/1/2/*", Client: "/1/2/*"},
+		Certificate{Id: "0041fd2d647fb6835ea3ab6a0d13fd3c6c0aa7beb9bcb0191068cf081c3127b9", Status: "INACTIVE", Topic: "/1/2/*", Client: "/1/2/*"},
+		Certificate{Id: "b5fcad63461f690c724bb76c506eefac06735275cac5bb7727195746d1b844e9", Status: "REVOKED", Topic: "/1/2/*", Client: "/1/2/*"},
+        }
+
 	responseBytes, err := json.Marshal(certificates)
 	if err != nil {
 		throw(resp, 500, "Could not list certificates!", err.Error())
