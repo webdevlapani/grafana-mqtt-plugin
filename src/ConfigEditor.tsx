@@ -1,9 +1,10 @@
 import _ from 'lodash';
 import * as $ from 'jquery';
 import React, { PureComponent } from 'react';
-import { LegacyForms } from '@grafana/ui';
+import { LegacyForms, Button, Modal } from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps, SelectableValue } from '@grafana/data';
-import { DataSourceOptions, Regions } from './types';
+import {DataSourceOptions, Regions} from './types';
+import axios from 'axios';
 
 const { FormField, Select } = LegacyForms;
 
@@ -13,6 +14,12 @@ interface State {
   region: SelectableValue<string>;
   endpoint: string;
   certificates: any[];
+  isCertificateModalOpen: boolean;
+  certificateModalTitle: string;
+  modalBody: string;
+  inputTopicPrefix: string;
+  inputClientIdPrefix: string;
+  newCertificateData: any,
 }
 
 export class ConfigEditor extends PureComponent<Props, State> {
@@ -23,6 +30,12 @@ export class ConfigEditor extends PureComponent<Props, State> {
       region: region,
       endpoint: '',
       certificates: [],
+      isCertificateModalOpen: false,
+      certificateModalTitle: 'Create a certificate',
+      modalBody: 'createCertificateSection',
+      inputTopicPrefix: '',
+      inputClientIdPrefix: '',
+      newCertificateData:{}
     };
 
     this.reload(region);
@@ -40,6 +53,12 @@ export class ConfigEditor extends PureComponent<Props, State> {
       region: value,
       endpoint: '',
       certificates: [],
+      isCertificateModalOpen: false,
+      certificateModalTitle: 'Create a certificate',
+      modalBody: 'createCertificateSection',
+      inputTopicPrefix: '',
+      inputClientIdPrefix: '',
+      newCertificateData:{}
     });
 
     this.reload(value);
@@ -67,10 +86,222 @@ export class ConfigEditor extends PureComponent<Props, State> {
       });
   };
 
-  render() {
-    const { region, endpoint, certificates } = this.state;
+  /**
+   * certificate action
+   * @param certificateId
+   * @param actionName
+   */
+  onClickCertificateAction = (certificateId: number, actionName: string) => {
+    const { options } = this.props;
+    if(actionName === 'disable') {
+      this.certificateActionApiCalls(options.id,certificateId, 'set-inactive');
+    } else if( actionName === 'enable') {
+      this.certificateActionApiCalls(options.id,certificateId, 'set-active')
+    } else if( actionName === 'revoked') {
+      this.certificateActionApiCalls(options.id,certificateId, 'revoke')
+    } else if( actionName === 'delete') {
+      this.certificateActionApiCalls(options.id,certificateId, 'delete')
+    }
+  }
 
-    return [
+  /**
+   * certificate Action Api Calls
+   * @param datasourceId
+   * @param certificateId
+   * @param actionName
+   */
+  certificateActionApiCalls = (datasourceId: number, certificateId: number, actionName: string ) => {
+    axios({
+      method: actionName === 'delete' ? 'delete' : 'patch',
+      url: `/api/datasources/${datasourceId}/resources/certificates/${actionName}?id=${certificateId}&region=${this.state.region.value}`,
+
+    }).then((data:any)  => {
+      this.setState({
+        newCertificateData: data
+      })
+    }).catch( error => {
+        // TODO: alert
+        console.log(error)
+    });
+  }
+
+  onClickCreateCertificate = () => {
+    this.setState({
+      certificateModalTitle: 'Create a policy',
+      modalBody: 'createPolicySection'
+    })
+  }
+
+  onAddCertificateClick = (e: any) => {
+    e.preventDefault();
+    this.setState({isCertificateModalOpen:true});
+  }
+
+  onClickCertificateCreate = () => {
+    const {inputClientIdPrefix, inputTopicPrefix} = this.state;
+    const { options } = this.props;
+
+    axios({
+      method: 'post',
+      url: `api/datasources/${options.id}/resources/certificates/create?region=${this.state.region.value}`,
+      data: {
+        "topic" : inputTopicPrefix,
+        "client" : inputClientIdPrefix
+      }
+    }).then((certificateData: any)=> {
+      this.setState({
+        newCertificateData:certificateData.data,
+        inputClientIdPrefix: '',
+        inputTopicPrefix: '',
+        certificateModalTitle: 'Certificate Created!',
+        modalBody:'certificateCreated'
+      })
+    }).catch((error => {
+      // TODO: alert
+      console.log(error);
+    }));
+  }
+
+  createCertificateSection = () => <>
+       <p>
+         A certificate is used to authenticate your device's connection to AWS IoT.
+       </p>
+       <div>
+         <h2>One-click certificate creation</h2>
+         <p>This will generate a certificate, public key, and private key.</p>
+         <Button size="sm" variant="destructive" onClick={this.onClickCreateCertificate}>
+           Create Certificate
+         </Button>
+       </div>
+     </>
+
+  onKeyDownload = (fileType: string) => {
+       const { id, public_key, private_key, certificate, root_ca } = this.state.newCertificateData;
+       let fileName='';
+       let data='';
+       if(fileType === 'certificate') {
+         fileName = `${id}.cert.pem`
+         data=certificate
+       } else if(fileType === 'publickey') {
+         fileName = `${id}.public.pem`
+         data=public_key
+       } else if(fileType === 'privatekey') {
+         fileName = `${id}.private.pem`
+         data=private_key
+       } else if(fileType === 'rootca') {
+         fileName = `RootCA.pem`
+         data=root_ca
+       }
+    let link = document.createElement('a');
+    link.download = fileName;
+    let blob = new Blob([data], {type: 'text/plain'});
+    link.href = window.URL.createObjectURL(blob);
+    link.click();
+  }
+
+  viewNewCertificateSection = () => <>
+    <p>
+      Download these files and save them in a safe place. These file cannot  be retrieved after you close this page.
+    </p>
+    <div>
+      <b>In order to connect a device, you need to download the following:</b>
+      <div>
+        <p> A Certificate: </p>
+        <p> A Certificate: </p>
+        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('certificate')}>
+          Download
+        </Button>
+      </div>
+      <div>
+        <p> A Public Key: </p>
+        <p> A Certificate: </p>
+        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('publickey')}>
+          Download
+        </Button>
+      </div>
+      <div>
+        <p> A Private Key: </p>
+        <p> A Certificate: </p>
+        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('privatekey')}>
+          Download
+        </Button>
+      </div>
+      <div>
+        <p> A root CA: </p>
+        <p> A Certificate: </p>
+        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('rootca')}>
+          Download
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() =>this.setState({'isCertificateModalOpen': false})}>
+          Done
+        </Button>
+      </div>
+    </div>
+  </>
+
+
+  createPolicySection = () => <>
+    <p>Create a policy to define a set of MQTT topics and client ids. Device with this certificate will only be able to these topic and client ids.</p>
+    <div className="gf-form-group" key="configuration">
+      <div className="gf-form">
+        <FormField
+          label="Topic Prefix"
+          labelWidth={10}
+          inputWidth={27}
+          value={this.state.inputTopicPrefix}
+          onChange={ (e) => this.setState({inputTopicPrefix: e.target.value})}
+        />
+      </div>
+      <div className="gf-form">
+        <FormField
+          label="Client ID Prefix"
+          labelWidth={10}
+          inputWidth={27}
+          value={this.state.inputClientIdPrefix}
+          onChange={ (e) => this.setState({inputClientIdPrefix: e.target.value})}
+        />
+      </div>
+      <div className="gf-form">
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={this.onClickCertificateCreate}>
+          Create
+        </Button>
+      </div>
+
+    </div>
+  </>
+
+  createCertificateModal = () => {
+    const {
+      certificateModalTitle,
+      modalBody
+    } = this.state;
+
+    return <Modal
+      isOpen={true}
+      onDismiss={() => this.setState({isCertificateModalOpen: false})}
+      title={certificateModalTitle}>
+      { modalBody === 'createCertificateSection' ?
+        this.createCertificateSection() :
+        modalBody === 'createPolicySection'?
+          this.createPolicySection() :
+        modalBody === 'certificateCreated' ?
+          this.viewNewCertificateSection(): ''
+      }
+    </Modal>
+  }
+
+  render() {
+    const {
+      region,
+      endpoint,
+      certificates,
+      isCertificateModalOpen
+    } = this.state;
+
+    return <>
       <div className="gf-form-group" key="region">
         <div className="gf-form">
           <FormField
@@ -80,7 +311,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
             inputEl={<Select width={27} options={Regions} value={region} onChange={this.onRegionChange} />}
           />
         </div>
-      </div>,
+      </div>
       <div className="gf-form-group" key="configuration">
         <div className="gf-form">
           <FormField
@@ -93,14 +324,57 @@ export class ConfigEditor extends PureComponent<Props, State> {
           />
         </div>
         <div className="gf-form">
-          <FormField label="MQTT Port" labelWidth={10} inputWidth={27} value="8883" readOnly />
+          <FormField label="MQTT Port123" labelWidth={10} inputWidth={27} value="8883" readOnly />
         </div>
-      </div>,
+      </div>
       <div className="gf-form-group" key="certificates">
+        <Button icon="plus" size="md" variant="destructive" onClick={(e) => this.onAddCertificateClick(e)}>
+          Add Certificate
+        </Button>
+
         {certificates.map(certificate => (
-          <p key={certificate.id}>{JSON.stringify(certificate)}</p>
+          <>
+            <div key={certificate.id}>
+              <p>Topic Prefix: {certificate.topic}</p>
+              <p>Client Prefix:{certificate.client}</p>
+              {
+                certificate.status !== 'REVOKED' ?
+                  certificate.status === 'INACTIVE' ?
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => this.onClickCertificateAction(certificate.id, 'enable')}>
+                      Enable
+                    </Button> :
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => this.onClickCertificateAction(certificate.id, 'disable')}>
+                      Disable
+                    </Button>
+                  :''
+              }
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => this.onClickCertificateAction(certificate.id, 'delete')}>
+                Delete
+              </Button>
+              {
+                certificate.status !== 'REVOKED' &&
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => this.onClickCertificateAction(certificate.id, 'revoked')}>
+                  Revoke
+                </Button>
+              }
+            </div>
+
+            {isCertificateModalOpen && this.createCertificateModal()}
+          </>
         ))}
-      </div>,
-    ];
+      </div>
+    </>
   }
 }

@@ -37,6 +37,14 @@ export const defaultQuery: Partial<Query> = {
   json_time_bucket: 1000000,
 };
 
+export interface ICertificateResultState {
+  "id"?: string;
+  "public_key"?: string;
+  "private_key"?: string;
+  "certificate"?: string;
+  "root_ca"?: string;
+}
+
 /**
  * These are options configured for each DataSource instance
  */
@@ -98,3 +106,4 @@ export const Regions = [
   { label: 'Canada (Central)', value: 'ca-central-1' },
   { label: 'South America (São Paulo)', value: 'sa-east-1' },
 ];
+
