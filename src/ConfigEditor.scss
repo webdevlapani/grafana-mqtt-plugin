@@ -1,0 +1,49 @@
+.types-of-certificate {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.disable-certificate {
+  background: #f3f0f0;
+}
+
+.create-certificate-add {
+  margin: 10px;
+  float: right;
+}
+
+.gf-form {
+  margin-bottom: 8px;
+}
+
+.certificate-download-section {
+  padding: 10px;
+  margin: 10px 10px 10px 0px;
+  display: flex;
+  border: 1px solid #ccc;
+  p:first-child {
+    font-weight: 700;
+  }
+  p {
+   width: 40%;
+  }
+}
+
+.button-done-certificate {
+  float: right;
+}
+
+.card-item-list-certi {
+  width: 100%;
+  .cared-item-certificate {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    .card-item-certi-details {
+      width: auto !important;
+    }
+     .card-item-list-box {
+       flex: 1;
+     }
+  }
+}

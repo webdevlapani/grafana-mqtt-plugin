@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import * as $ from 'jquery';
 import React, { PureComponent } from 'react';
-import { LegacyForms, Button, Modal } from '@grafana/ui';
+import {LegacyForms, Button, Modal} from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps, SelectableValue } from '@grafana/data';
 import {DataSourceOptions, Regions} from './types';
 import axios from 'axios';
+import './ConfigEditor.scss';
+import CertificateList from "./CertificateList";
 
 const { FormField, Select } = LegacyForms;
 
@@ -33,8 +35,8 @@ export class ConfigEditor extends PureComponent<Props, State> {
       isCertificateModalOpen: false,
       certificateModalTitle: 'Create a certificate',
       modalBody: 'createCertificateSection',
-      inputTopicPrefix: '',
-      inputClientIdPrefix: '',
+      inputTopicPrefix: '*',
+      inputClientIdPrefix: '*',
       newCertificateData:{}
     };
 
@@ -56,8 +58,8 @@ export class ConfigEditor extends PureComponent<Props, State> {
       isCertificateModalOpen: false,
       certificateModalTitle: 'Create a certificate',
       modalBody: 'createCertificateSection',
-      inputTopicPrefix: '',
-      inputClientIdPrefix: '',
+      inputTopicPrefix: '*',
+      inputClientIdPrefix: '*',
       newCertificateData:{}
     });
 
@@ -132,7 +134,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
     })
   }
 
-  onAddCertificateClick = (e: any) => {
+  onAddCertificateClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     this.setState({isCertificateModalOpen:true});
   }
@@ -151,8 +153,8 @@ export class ConfigEditor extends PureComponent<Props, State> {
     }).then((certificateData: any)=> {
       this.setState({
         newCertificateData:certificateData.data,
-        inputClientIdPrefix: '',
-        inputTopicPrefix: '',
+        inputClientIdPrefix: '*',
+        inputTopicPrefix: '*',
         certificateModalTitle: 'Certificate Created!',
         modalBody:'certificateCreated'
       })
@@ -166,13 +168,29 @@ export class ConfigEditor extends PureComponent<Props, State> {
        <p>
          A certificate is used to authenticate your device's connection to AWS IoT.
        </p>
-       <div>
+       <div className="types-of-certificate">
          <h2>One-click certificate creation</h2>
          <p>This will generate a certificate, public key, and private key.</p>
-         <Button size="sm" variant="destructive" onClick={this.onClickCreateCertificate}>
+         <Button size="md" variant="destructive" onClick={this.onClickCreateCertificate}>
            Create Certificate
          </Button>
        </div>
+
+      <div className="types-of-certificate disable-certificate">
+        <h2>Use my certificate <small><b>Coming soon</b></small></h2>
+        <p>Use your own certificates for one or many devices.</p>
+        <Button size="md" variant="destructive">
+          Upload certificate
+        </Button>
+      </div>
+
+      <div className="types-of-certificate disable-certificate">
+        <h2>Register my CA <small><b>Coming soon</b></small></h2>
+        <p>Register your CA certificate and enable auto registration of certificates signed by your CA</p>
+        <Button size="md" variant="destructive">
+          Get Started
+        </Button>
+      </div>
      </>
 
   onKeyDownload = (fileType: string) => {
@@ -199,45 +217,50 @@ export class ConfigEditor extends PureComponent<Props, State> {
     link.click();
   }
 
-  viewNewCertificateSection = () => <>
-    <p>
-      Download these files and save them in a safe place. These file cannot  be retrieved after you close this page.
-    </p>
-    <div>
-      <b>In order to connect a device, you need to download the following:</b>
-      <div>
-        <p> A Certificate: </p>
-        <p> A Certificate: </p>
-        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('certificate')}>
-          Download
-        </Button>
-      </div>
-      <div>
-        <p> A Public Key: </p>
-        <p> A Certificate: </p>
-        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('publickey')}>
-          Download
-        </Button>
-      </div>
-      <div>
-        <p> A Private Key: </p>
-        <p> A Certificate: </p>
-        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('privatekey')}>
-          Download
-        </Button>
-      </div>
-      <div>
-        <p> A root CA: </p>
-        <p> A Certificate: </p>
-        <Button size="sm" variant="destructive" onClick={() =>this.onKeyDownload('rootca')}>
-          Download
-        </Button>
-        <Button size="sm" variant="destructive" onClick={() =>this.setState({'isCertificateModalOpen': false})}>
-          Done
-        </Button>
-      </div>
-    </div>
-  </>
+  viewNewCertificateSection = () => {
+     const { id } = this.state.newCertificateData;
+       return <>
+         <p>
+           Download these files and save them in a safe place. These file cannot  be retrieved after you close this page.
+         </p>
+         <div>
+           <b>In order to connect a device, you need to download the following:</b>
+           <div className="certificate-download-section">
+             <p> A Certificate: </p>
+             <p> {`${id}.cert.pem`} </p>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('certificate')}>
+               Download
+             </Button>
+           </div>
+           <div className="certificate-download-section">
+             <p> A Public Key: </p>
+             <p> {`${id}.public.key`} </p>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('publickey')}>
+               Download
+             </Button>
+           </div>
+           <div className="certificate-download-section">
+             <p> A Private Key: </p>
+             <p> {`${id}.private.key`} </p>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('privatekey')}>
+               Download
+             </Button>
+           </div>
+           <div className="certificate-download-section">
+             <p> A root CA: </p>
+             <p> {`RootCA.pem`} </p>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('rootca')}>
+               Download
+             </Button>
+           </div>
+         </div>
+         <div>
+           <Button className="button-done-certificate" size="md" variant="primary" onClick={() =>this.setState({'isCertificateModalOpen': false})}>
+             Done
+           </Button>
+         </div>
+       </>
+  }
 
 
   createPolicySection = () => <>
@@ -245,31 +268,29 @@ export class ConfigEditor extends PureComponent<Props, State> {
     <div className="gf-form-group" key="configuration">
       <div className="gf-form">
         <FormField
-          label="Topic Prefix"
-          labelWidth={10}
-          inputWidth={27}
+          label="Topic Prefix: 1/2/"
+          labelWidth={12}
+          inputWidth={30}
           value={this.state.inputTopicPrefix}
           onChange={ (e) => this.setState({inputTopicPrefix: e.target.value})}
         />
       </div>
       <div className="gf-form">
         <FormField
-          label="Client ID Prefix"
-          labelWidth={10}
-          inputWidth={27}
+          label="Client ID Prefix: 1/2/"
+          labelWidth={12}
+          inputWidth={30}
           value={this.state.inputClientIdPrefix}
           onChange={ (e) => this.setState({inputClientIdPrefix: e.target.value})}
         />
       </div>
-      <div className="gf-form">
         <Button
-          size="sm"
+          className="create-certificate-add"
+          size="md"
           variant="destructive"
           onClick={this.onClickCertificateCreate}>
           Create
         </Button>
-      </div>
-
     </div>
   </>
 
@@ -281,7 +302,11 @@ export class ConfigEditor extends PureComponent<Props, State> {
 
     return <Modal
       isOpen={true}
-      onDismiss={() => this.setState({isCertificateModalOpen: false})}
+      onDismiss={() => this.setState({
+        isCertificateModalOpen: false,
+        modalBody: 'createCertificateSection',
+        certificateModalTitle: 'Create a certificate',
+      })}
       title={certificateModalTitle}>
       { modalBody === 'createCertificateSection' ?
         this.createCertificateSection() :
@@ -301,7 +326,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
       isCertificateModalOpen
     } = this.state;
 
-    return <>
+    return <div className="config-editor">
       <div className="gf-form-group" key="region">
         <div className="gf-form">
           <FormField
@@ -327,27 +352,32 @@ export class ConfigEditor extends PureComponent<Props, State> {
           <FormField label="MQTT Port123" labelWidth={10} inputWidth={27} value="8883" readOnly />
         </div>
       </div>
-      <div className="gf-form-group" key="certificates">
-        <Button icon="plus" size="md" variant="destructive" onClick={(e) => this.onAddCertificateClick(e)}>
+      <div className="gf-form-group">
+        <Button
+          icon="plus"
+          size="md"
+          className="btn-add-certificate"
+          variant="destructive"
+          onClick={(e) => this.onAddCertificateClick(e)}>
           Add Certificate
         </Button>
+      </div>
 
+      <div className="gf-form-group" key="certificates">
         {certificates.map(certificate => (
           <>
-            <div key={certificate.id}>
-              <p>Topic Prefix: {certificate.topic}</p>
-              <p>Client Prefix:{certificate.client}</p>
+            <CertificateList certificate={certificate}>
               {
                 certificate.status !== 'REVOKED' ?
                   certificate.status === 'INACTIVE' ?
                     <Button
-                      size="sm"
-                      variant="destructive"
+                      size="md"
+                      variant="primary"
                       onClick={() => this.onClickCertificateAction(certificate.id, 'enable')}>
                       Enable
                     </Button> :
                     <Button
-                      size="sm"
+                      size="md"
                       variant="destructive"
                       onClick={() => this.onClickCertificateAction(certificate.id, 'disable')}>
                       Disable
@@ -355,7 +385,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
                   :''
               }
               <Button
-                size="sm"
+                size="md"
                 variant="destructive"
                 onClick={() => this.onClickCertificateAction(certificate.id, 'delete')}>
                 Delete
@@ -363,18 +393,17 @@ export class ConfigEditor extends PureComponent<Props, State> {
               {
                 certificate.status !== 'REVOKED' &&
                 <Button
-                  size="sm"
+                  size="md"
                   variant="destructive"
                   onClick={() => this.onClickCertificateAction(certificate.id, 'revoked')}>
                   Revoke
                 </Button>
               }
-            </div>
-
+            </CertificateList>
             {isCertificateModalOpen && this.createCertificateModal()}
           </>
         ))}
       </div>
-    </>
+    </div>
   }
 }

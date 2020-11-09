@@ -37,12 +37,11 @@ export const defaultQuery: Partial<Query> = {
   json_time_bucket: 1000000,
 };
 
-export interface ICertificateResultState {
-  "id"?: string;
-  "public_key"?: string;
-  "private_key"?: string;
-  "certificate"?: string;
-  "root_ca"?: string;
+export interface ICertificate {
+  client: string;
+  id: string;
+  status: string;
+  topic: string;
 }
 
 /**
