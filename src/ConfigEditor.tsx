@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import * as $ from 'jquery';
 import React, { PureComponent } from 'react';
-import {LegacyForms, Button, Modal} from '@grafana/ui';
+import {LegacyForms, Button, Modal, Form, Input, Field} from '@grafana/ui';
 import { DataSourcePluginOptionsEditorProps, SelectableValue } from '@grafana/data';
-import {DataSourceOptions, Regions} from './types';
+import {DataSourceOptions, ICreateCertificateFormModel, Regions} from './types';
 import axios from 'axios';
 import './ConfigEditor.scss';
 import CertificateList from "./CertificateList";
@@ -12,6 +12,7 @@ const { FormField, Select } = LegacyForms;
 
 interface Props extends DataSourcePluginOptionsEditorProps<DataSourceOptions> {}
 
+
 interface State {
   region: SelectableValue<string>;
   endpoint: string;
@@ -19,8 +20,7 @@ interface State {
   isCertificateModalOpen: boolean;
   certificateModalTitle: string;
   modalBody: string;
-  inputTopicPrefix: string;
-  inputClientIdPrefix: string;
+  createCertificateForm: ICreateCertificateFormModel;
   newCertificateData: any,
 }
 
@@ -35,8 +35,10 @@ export class ConfigEditor extends PureComponent<Props, State> {
       isCertificateModalOpen: false,
       certificateModalTitle: 'Create a certificate',
       modalBody: 'createCertificateSection',
-      inputTopicPrefix: '*',
-      inputClientIdPrefix: '*',
+      createCertificateForm: {
+        inputTopicPrefix: '*',
+        inputClientIdPrefix: '*'
+      },
       newCertificateData:{}
     };
 
@@ -58,8 +60,10 @@ export class ConfigEditor extends PureComponent<Props, State> {
       isCertificateModalOpen: false,
       certificateModalTitle: 'Create a certificate',
       modalBody: 'createCertificateSection',
-      inputTopicPrefix: '*',
-      inputClientIdPrefix: '*',
+      createCertificateForm: {
+        inputTopicPrefix: '*',
+        inputClientIdPrefix: '*'
+      },
       newCertificateData:{}
     });
 
@@ -139,22 +143,24 @@ export class ConfigEditor extends PureComponent<Props, State> {
     this.setState({isCertificateModalOpen:true});
   }
 
-  onClickCertificateCreate = () => {
-    const {inputClientIdPrefix, inputTopicPrefix} = this.state;
+  onClickCertificateCreate = (formData: ICreateCertificateFormModel) => {
+    debugger
     const { options } = this.props;
 
     axios({
       method: 'post',
       url: `api/datasources/${options.id}/resources/certificates/create?region=${this.state.region.value}`,
       data: {
-        "topic" : inputTopicPrefix,
-        "client" : inputClientIdPrefix
+        "topic" : formData.inputTopicPrefix,
+        "client" : formData.inputClientIdPrefix
       }
     }).then((certificateData: any)=> {
       this.setState({
         newCertificateData:certificateData.data,
-        inputClientIdPrefix: '*',
-        inputTopicPrefix: '*',
+        createCertificateForm: {
+          inputTopicPrefix: '*',
+          inputClientIdPrefix: '*'
+        },
         certificateModalTitle: 'Certificate Created!',
         modalBody:'certificateCreated'
       })
@@ -255,7 +261,15 @@ export class ConfigEditor extends PureComponent<Props, State> {
            </div>
          </div>
          <div>
-           <Button className="button-done-certificate" size="md" variant="primary" onClick={() =>this.setState({'isCertificateModalOpen': false})}>
+           <Button
+             className="button-done-certificate"
+             size="md"
+             variant="primary"
+             onClick={() =>this.setState({
+               isCertificateModalOpen: false,
+               certificateModalTitle: 'Certificate Created!',
+               modalBody:'certificateCreated'
+             })}>
              Done
            </Button>
          </div>
@@ -265,33 +279,35 @@ export class ConfigEditor extends PureComponent<Props, State> {
 
   createPolicySection = () => <>
     <p>Create a policy to define a set of MQTT topics and client ids. Device with this certificate will only be able to these topic and client ids.</p>
-    <div className="gf-form-group" key="configuration">
-      <div className="gf-form">
-        <FormField
-          label="Topic Prefix: 1/2/"
-          labelWidth={12}
-          inputWidth={30}
-          value={this.state.inputTopicPrefix}
-          onChange={ (e) => this.setState({inputTopicPrefix: e.target.value})}
-        />
-      </div>
-      <div className="gf-form">
-        <FormField
-          label="Client ID Prefix: 1/2/"
-          labelWidth={12}
-          inputWidth={30}
-          value={this.state.inputClientIdPrefix}
-          onChange={ (e) => this.setState({inputClientIdPrefix: e.target.value})}
-        />
-      </div>
-        <Button
-          className="create-certificate-add"
-          size="md"
-          variant="destructive"
-          onClick={this.onClickCertificateCreate}>
-          Create
-        </Button>
-    </div>
+    <Form maxWidth={700} defaultValues={this.state.createCertificateForm} onSubmit={this.onClickCertificateCreate}>
+      {({ register, errors }) => (
+            <>
+              <Field invalid={!!errors.inputTopicPrefix} error={errors.inputTopicPrefix && errors.inputTopicPrefix.message} label="Topic Prefix: 1/2/">
+                <Input
+                  name="inputTopicPrefix"
+                  ref={register({
+                    required: 'Client ID Prefix is required',
+                  })}
+                />
+              </Field>
+              <Field invalid={!!errors.inputClientIdPrefix} error={errors.inputClientIdPrefix && errors.inputClientIdPrefix.message} label="Client ID Prefix: 1/2/">
+                <Input
+                  name="inputClientIdPrefix"
+                  ref={register({
+                    required: 'Client ID Prefix is required',
+                  })}
+                />
+              </Field>
+              <Button
+                className="create-certificate-add"
+                size="md"
+                variant="destructive"
+                type="submit">
+                Create
+              </Button>
+            </>
+      )}
+    </Form>
   </>
 
   createCertificateModal = () => {

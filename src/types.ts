@@ -44,6 +44,11 @@ export interface ICertificate {
   topic: string;
 }
 
+export interface ICreateCertificateFormModel {
+  inputTopicPrefix: string;
+  inputClientIdPrefix: string;
+}
+
 /**
  * These are options configured for each DataSource instance
  */

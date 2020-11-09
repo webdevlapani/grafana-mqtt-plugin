@@ -20,8 +20,8 @@ const CertificateList: FunctionComponent<IColumnProps> = ({ certificate, childre
             <div className="card-item-details card-item-list-certi">
               <div className="card-item-name cared-item-certificate">
                 <div className="card-item-list-box">
-                  <p>Topic Prefix: {certificate.topic}</p>
-                  <p>Client Prefix:{certificate.client}</p>
+                  <p><b>Topic Prefix:</b> {certificate.topic}</p>
+                  <p><b>Client Prefix:</b>{certificate.client}</p>
                 </div>
 
                 <HorizontalGroup width="auto" className="card-item-certi-details">
