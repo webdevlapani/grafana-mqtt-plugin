@@ -365,7 +365,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
           />
         </div>
         <div className="gf-form">
-          <FormField label="MQTT Port123" labelWidth={10} inputWidth={27} value="8883" readOnly />
+          <FormField label="MQTT Port" labelWidth={10} inputWidth={27} value="8883" readOnly />
         </div>
       </div>
       <div className="gf-form-group">
