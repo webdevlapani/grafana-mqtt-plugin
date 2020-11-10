@@ -99,15 +99,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
    */
   onClickCertificateAction = (certificateId: number, actionName: string) => {
     const { options } = this.props;
-    if(actionName === 'disable') {
-      this.certificateActionApiCalls(options.id,certificateId, 'set-inactive');
-    } else if( actionName === 'enable') {
-      this.certificateActionApiCalls(options.id,certificateId, 'set-active')
-    } else if( actionName === 'revoked') {
-      this.certificateActionApiCalls(options.id,certificateId, 'revoke')
-    } else if( actionName === 'delete') {
-      this.certificateActionApiCalls(options.id,certificateId, 'delete')
-    }
+    this.certificateActionApiCalls(options.id,certificateId, actionName);
   }
 
   /**
@@ -144,7 +136,6 @@ export class ConfigEditor extends PureComponent<Props, State> {
   }
 
   onClickCertificateCreate = (formData: ICreateCertificateFormModel) => {
-    debugger
     const { options } = this.props;
 
     axios({
@@ -200,25 +191,26 @@ export class ConfigEditor extends PureComponent<Props, State> {
      </>
 
   onKeyDownload = (fileType: string) => {
-       const { id, public_key, private_key, certificate, root_ca } = this.state.newCertificateData;
-       let fileName='';
-       let data='';
-       if(fileType === 'certificate') {
-         fileName = `${id}.cert.pem`
-         data=certificate
-       } else if(fileType === 'publickey') {
-         fileName = `${id}.public.pem`
-         data=public_key
-       } else if(fileType === 'privatekey') {
-         fileName = `${id}.private.pem`
-         data=private_key
-       } else if(fileType === 'rootca') {
-         fileName = `RootCA.pem`
-         data=root_ca
+       const { id } = this.state.newCertificateData;
+
+       type certiOptions = {
+          [key: string]: {
+            type: string,
+            extension: string
+          }
        }
+
+       const certificateData:certiOptions = {
+         certificate: { type: 'cert', extension: 'pem' },
+         public_key: { type: 'public', extension: 'key' },
+         private_key: { type: 'private', extension: 'key' },
+         root_ca: { type: 'RootCA', extension: 'pem' }
+       };
+
+
     let link = document.createElement('a');
-    link.download = fileName;
-    let blob = new Blob([data], {type: 'text/plain'});
+    link.download = certificateData[fileType]['type'] === 'RootCA'? 'RootCA.pem' :`${id}.${certificateData[fileType][`type`]}.${certificateData[fileType][`extension`]}`;
+    let blob = new Blob([fileType], {type: 'text/plain'});
     link.href = window.URL.createObjectURL(blob);
     link.click();
   }
@@ -241,21 +233,21 @@ export class ConfigEditor extends PureComponent<Props, State> {
            <div className="certificate-download-section">
              <p> A Public Key: </p>
              <p> {`${id}.public.key`} </p>
-             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('publickey')}>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('public_key')}>
                Download
              </Button>
            </div>
            <div className="certificate-download-section">
              <p> A Private Key: </p>
              <p> {`${id}.private.key`} </p>
-             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('privatekey')}>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('private_key')}>
                Download
              </Button>
            </div>
            <div className="certificate-download-section">
              <p> A root CA: </p>
              <p> {`RootCA.pem`} </p>
-             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('rootca')}>
+             <Button size="md" variant="destructive" onClick={() =>this.onKeyDownload('root_ca')}>
                Download
              </Button>
            </div>
@@ -389,13 +381,13 @@ export class ConfigEditor extends PureComponent<Props, State> {
                     <Button
                       size="md"
                       variant="primary"
-                      onClick={() => this.onClickCertificateAction(certificate.id, 'enable')}>
+                      onClick={() => this.onClickCertificateAction(certificate.id, 'set-active')}>
                       Enable
                     </Button> :
                     <Button
                       size="md"
                       variant="destructive"
-                      onClick={() => this.onClickCertificateAction(certificate.id, 'disable')}>
+                      onClick={() => this.onClickCertificateAction(certificate.id, 'set-inactive')}>
                       Disable
                     </Button>
                   :''
@@ -411,7 +403,7 @@ export class ConfigEditor extends PureComponent<Props, State> {
                 <Button
                   size="md"
                   variant="destructive"
-                  onClick={() => this.onClickCertificateAction(certificate.id, 'revoked')}>
+                  onClick={() => this.onClickCertificateAction(certificate.id, 'revoke')}>
                   Revoke
                 </Button>
               }
