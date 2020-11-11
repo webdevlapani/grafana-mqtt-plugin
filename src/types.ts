@@ -37,14 +37,14 @@ export const defaultQuery: Partial<Query> = {
   json_time_bucket: 1000000,
 };
 
-export interface ICertificate {
+export interface Certificate {
   client: string;
   id: string;
   status: string;
   topic: string;
 }
 
-export interface ICreateCertificateFormModel {
+export interface CreateCertificateFormModel {
   inputTopicPrefix: string;
   inputClientIdPrefix: string;
 }
@@ -110,4 +110,3 @@ export const Regions = [
   { label: 'Canada (Central)', value: 'ca-central-1' },
   { label: 'South America (São Paulo)', value: 'sa-east-1' },
 ];
-
